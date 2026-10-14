@@ -14,7 +14,7 @@ function App() {
 
       <main className="container">
         {pagina === 'catalogo' && <Catalogo />}
-        {pagina === 'carrito' && <Carrito />}
+        {pagina === 'carrito' && <Carrito onNavegar={setPagina} />}
         {pagina === 'checkout' && <Checkout />}
         {pagina === 'lab' && <RenderLab />}
       </main>
