@@ -1,36 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ProductCard from '../components/ProductCard'
+import { useFetch } from '../hooks/useFetch'
 
 const URL = 'https://dummyjson.com/products?limit=0'
 const CATEGORIAS = ['laptops', 'smartphones', 'tablets', 'mobile-accessories']
 
 function Catalogo() {
-  const [productos, setProductos] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState(null)
+  // Paso 5: toda la lógica de fetch ahora vive en useFetch (reutilizable)
+  const { data, cargando, error } = useFetch(URL)
+  const productos = useMemo(
+    () => (data ? data.products.filter((p) => CATEGORIAS.includes(p.category)) : []),
+    [data]
+  )
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('todas')
-  const inputRef = useRef(null) // referencia al DOM, cambiarla NO causa re-render
-
-  useEffect(() => {
-    const controller = new AbortController()
-    const cargarProductos = async () => {
-      try {
-        setCargando(true)
-        const res = await fetch(URL, { signal: controller.signal })
-        if (!res.ok) throw new Error(`Error ${res.status}`)
-        const data = await res.json()
-        setProductos(data.products.filter((p) => CATEGORIAS.includes(p.category)))
-      } catch (err) {
-        if (err.name !== 'AbortError') setError(err.message)
-      } finally {
-        if (!controller.signal.aborted) setCargando(false)
-      }
-    }
-    cargarProductos()
-    return () => controller.abort()
-  }, [])
-
+  const inputRef = useRef(null)
+  
   // useRef: foco automático en el buscador al entrar
   useEffect(() => {
     inputRef.current?.focus()
